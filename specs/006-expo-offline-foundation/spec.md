@@ -366,7 +366,15 @@ Hacer en un emulador o dispositivo Android y en la web (desarrollo y despliegue)
   de las rutas y los bundles sí las llevan. En producción (Vercel) las lleva todo.
   Durante la implementación se verificó en Chromium que, aun sin aislamiento, la versión
   actual de `expo-sqlite` guarda y persiste en `/`. El impacto en desarrollo es nulo en
-  Chromium; en otros navegadores no se verificó. Pendiente de decisión (ver T039).
+  Chromium; en otros navegadores no se verificó.
+  **Decisión (T039, 2026-11-16)**: se mantienen las cabeceras en desarrollo y en
+  producción y se acepta la raíz `/` de desarrollo sin ellas. La app usa solo la API
+  asíncrona de `expo-sqlite`, que se comunica con el worker por mensajes y no necesita
+  memoria compartida, así que la falta de aislamiento en `/` no tiene efecto. Las
+  cabeceras se dejan porque la documentación de Expo las pide para web y solo se probó
+  sin ellas en Chromium. Se vuelve a evaluar quitarlas en la 007/008 si
+  `require-corp` bloquea imágenes de otro origen (avatares de Google, Supabase Storage),
+  probando antes en Firefox y Safari.
 
 ## Assumptions
 

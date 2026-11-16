@@ -29,8 +29,9 @@ Desde ahí se abre en Android (Expo Go) o en web (tecla `w`).
 
 En web, SQLite necesita aislamiento entre orígenes (cabeceras COOP/COEP). En producción las
 sirve `vercel.json`. En desarrollo las agregan `metro.config.js` y `app.json`, salvo en la
-raíz `/`: Expo CLI la sirve con un middleware propio que no permite agregar cabeceras (ver
-la sección "Limitaciones conocidas" de la spec 006).
+raíz `/`: Expo CLI la sirve con un middleware propio que no permite agregar cabeceras. No
+afecta, porque la app usa solo la API asíncrona de SQLite (ver "Limitaciones conocidas" de
+la spec 006).
 
 ## Gates de calidad
 

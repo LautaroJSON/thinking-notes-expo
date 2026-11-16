@@ -127,7 +127,8 @@ desarrollo y Vercel.
 - [X] T036 [P] [US5] Traer src/components/utils/copyNote.ts de la app Vite tal cual hasta que T031 pase
 - [X] T037 [P] [US5] Generar metro.config.js con `npx expo customize metro.config.js`, agregar `config.resolver.assetExts.push("wasm")` y, en `config.server.enhanceMiddleware`, las cabeceras `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Embedder-Policy: require-corp` (contracts/web-headers.md)
 - [X] T038 [P] [US5] Crear vercel.json con `buildCommand: "npx expo export -p web"`, `outputDirectory: "dist"`, `framework: null`, `cleanUrls: true`, el rewrite `{ source: "/:path*", destination: "/" }` y `headers: [{ source: "/(.*)", headers: [COOP same-origin, COEP require-corp] }]`
-- [ ] T039 [US5] Verificar con `npx expo start --web` y `curl -sI http://localhost:8081 | grep -i cross-origin` que se ven las dos cabeceras, y que `npx expo export --platform web` incluye el `.wasm` de expo-sqlite en `dist/`
+- [X] T039 [US5] Verificar con `npx expo start --web` y `curl -sI http://localhost:8081 | grep -i cross-origin` que se ven las dos cabeceras, y que `npx expo export --platform web` incluye el `.wasm` de expo-sqlite en `dist/`
+  - Resuelto (2026-11-16): las cabeceras se ven en todas las rutas salvo en la raíz `/` de desarrollo (ver "Limitaciones conocidas" en la spec). Se mantienen; la raíz sin cabeceras se acepta porque la app usa solo la API asíncrona.
 
 **Checkpoint**: base completa; los cuatro gates pasan.
 
