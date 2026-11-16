@@ -1,5 +1,20 @@
 <!--
 Sync Impact Report
+- Versión: 2.0.0 → 2.1.0 (MINOR: ramas y commits automáticos con la extensión git de Spec Kit)
+- Principios modificados: ninguno.
+- Secciones modificadas:
+  - Flujo de Desarrollo y Calidad → Ramas: `feat/...`/`fix/...` hacia `main` → rama
+    `NNN-slug` por funcionalidad, creada por `/speckit-specify` desde `master`; `fix/...`
+    solo para arreglos fuera del flujo SDD.
+  - Flujo de Desarrollo y Calidad → Commits: incluye los commits automáticos de Spec Kit.
+  - Restricciones Técnicas → Despliegue web: "push a `main`" → "push a la rama principal
+    (`master`)".
+- Secciones agregadas / eliminadas: ninguna.
+- Plantillas dependientes: sin cambios (leen la constitución en tiempo de ejecución).
+  Configuración asociada: `.specify/extensions.yml` y `.specify/extensions/git/git-config.yml`.
+- TODOs diferidos: ninguno.
+
+Historial — 2.0.0:
 - Versión: 1.1.0 → 2.0.0 (MAJOR: migración de la app web Vite a Expo / React Native)
 - Contexto: la constitución se trae del repositorio `thinking-notes` (app Vite) al nuevo
   repositorio `thinking-notes-expo`, que reemplazará a la app Vite cuando alcance paridad.
@@ -146,7 +161,7 @@ disperso volvería a convertirla en dos.
 - **Plataformas**: Android y web. iOS queda fuera de alcance hasta una enmienda que lo
   incorpore.
 - **Despliegue web**: Vercel, con export estático de Expo (`web.output: "single"`),
-  desplegado automáticamente en cada push a `main`. Durante la migración se usa un
+  desplegado automáticamente en cada push a la rama principal (`master`). Durante la migración se usa un
   proyecto de Vercel nuevo con su URL `*.vercel.app`; la app Vite sigue en producción
   en su propio proyecto. Al cumplirse la condición de cierre de la migración, el dominio
   propio se traspasa del proyecto viejo al nuevo.
@@ -182,10 +197,14 @@ disperso volvería a convertirla en dos.
 
 ## Flujo de Desarrollo y Calidad
 
-- **Ramas**: el trabajo se hace en ramas `feat/...` o `fix/...` y entra a `main` por
-  Pull Request.
+- **Ramas**: la rama principal es `master`. Cada funcionalidad se desarrolla en su
+  propia rama `NNN-slug`, con el mismo número y nombre que su carpeta en `specs/`; la
+  crea automáticamente la extensión `git` de Spec Kit al correr `/speckit-specify`
+  desde `master`. Los arreglos chicos fuera del flujo SDD PUEDEN ir en ramas
+  `fix/...`. Todo entra a `master` por Pull Request.
 - **Commits**: formato Conventional Commits en español (`feat:`, `fix:`, `ci:`,
-  `docs:`, `refactor:`, `test:`).
+  `docs:`, `refactor:`, `test:`). Esto incluye los commits automáticos que hace
+  Spec Kit al empezar y al terminar cada comando.
 - **Gates antes de mergear** (también corren en el workflow de CI):
   - `npx tsc --noEmit` DEBE pasar.
   - `npx expo lint` DEBE pasar sin errores (el proyecto arranca sin deuda de lint).
@@ -213,4 +232,4 @@ disperso volvería a convertirla en dos.
   excepción a un principio DEBE quedar justificada por escrito en el plan
   (sección de complejidad/excepciones).
 
-**Version**: 2.0.0 | **Ratified**: 2026-11-05 | **Last Amended**: 2026-11-16
+**Version**: 2.1.0 | **Ratified**: 2026-11-05 | **Last Amended**: 2026-11-16
