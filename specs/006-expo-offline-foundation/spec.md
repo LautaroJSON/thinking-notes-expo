@@ -376,6 +376,15 @@ Hacer en un emulador o dispositivo Android y en la web (desarrollo y despliegue)
   `require-corp` bloquea imágenes de otro origen (avatares de Google, Supabase Storage),
   probando antes en Firefox y Safari.
 
+- **Error de Expo Go en la primera apertura (Android)**: durante la verificación manual,
+  la primera vez que se abrió el proyecto en Expo Go apareció
+  `The ExpoContext of expo.modules.sqlite.SQLiteModule is closed` al cargar `expo-sqlite`
+  (dentro de la librería, antes de ejecutar código del proyecto), seguido de errores de
+  Expo Router que son consecuencia de ese primero. Al recargar funcionó bien, sin pérdida de
+  datos, y no se repitió al cerrar y reabrir la app. Se toma como una falla de Expo Go al
+  cambiar de contexto de ejecución. Se vuelve a verificar con una build de desarrollo en la
+  008.
+
 ## Assumptions
 
 - El retraso de guardado automático es de 2 segundos, el valor que usa el editor de la
