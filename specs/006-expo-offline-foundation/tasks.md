@@ -57,18 +57,18 @@ el adaptador de test de SQLite.
 
 **⚠️ CRITICAL**: ninguna historia puede empezar hasta terminar esta fase.
 
-- [ ] T008 [P] Crear src/lib/id.ts con `export const newId = (): string => randomUUID()` (de `expo-crypto`)
-- [ ] T009 [P] Traer src/types/index.ts de la app Vite (`src/types/index.ts`) tal cual: `INotes`, `IsLoggedType`, `WaitingResponseType` y los re-exports de `./thinking`
-- [ ] T010 Traer src/types/thinking.test.ts de la app Vite (`src/types/thinking.test.ts`) adaptado a Jest (mismo regex de UUID v4, `jest.spyOn(console, "warn")`) y verificar que falla; borrar src/lib/smoke.test.ts
-- [ ] T011 Traer src/types/thinking.ts de la app Vite cambiando solo `uuidv4()` por `newId()` de `@/lib/id` (sin importar `uuid`) hasta que T010 pase
-- [ ] T012 [P] Traer src/hooks/useDebounce.test.ts de la app Vite adaptado a Jest con timers falsos (`jest.useFakeTimers`, `renderHook` y `act` de `@testing-library/react-native`)
-- [ ] T013 [P] Traer src/hooks/useDebounce.ts de la app Vite tal cual hasta que T012 pase
-- [ ] T014 [P] Traer src/components/utils/reorder.test.ts de la app Vite adaptado a Jest
-- [ ] T015 [P] Traer src/components/utils/reorder.ts de la app Vite tal cual (`moveNote`, `applyOrder`) hasta que T014 pase
-- [ ] T016 Crear src/services/notes/repository.ts con el tipo `NotesDatabase` (la parte de `SQLiteDatabase` de `expo-sqlite` que se usa: `execAsync`, `runAsync`, `getAllAsync`, `getFirstAsync`, `withTransactionAsync`, expresada con `Pick<SQLiteDatabase, ...>`) y la interfaz `NotesRepository` exacta de contracts/notes-repository.md
-- [ ] T017 Crear el adaptador de test src/services/notes/testing/nodeSqliteDatabase.ts: `createNodeSqliteDatabase(): NotesDatabase` sobre `DatabaseSync(":memory:")` de `node:sqlite`. Cada método async envuelve `prepare(sql).run/all/get(...params)`; `execAsync` usa `exec`; `withTransactionAsync(task)` hace `BEGIN`, `await task()` y `COMMIT`, o `ROLLBACK` y relanza si falla. Agregar también `createFailingDatabase(options: { failReads?: boolean; failWrites?: boolean; failOnWriteNumber?: number })`, que envuelve una base de node:sqlite real y rechaza todas las lecturas, todas las escrituras, o solo la N-ésima llamada a `runAsync` (para simular una falla a mitad de una transacción, T040); lo usan US2 y US4
-- [ ] T018 Crear src/services/notes/database.test.ts: `migrateDatabase` sobre la base de node:sqlite crea la tabla `notes` con las columnas de data-model.md, deja `PRAGMA user_version = 1` y es idempotente si se llama dos veces
-- [ ] T019 Crear src/services/notes/database.ts con `migrateDatabase(db: NotesDatabase)` (migración 0 → 1 de data-model.md, dentro de `withTransactionAsync`, con `PRAGMA user_version`) y `getDatabase()`: `openDatabaseAsync("thinking-notes.db")` + `migrateDatabase`, con la promesa memoizada y limpiada si falla; hasta que T018 pase
+- [X] T008 [P] Crear src/lib/id.ts con `export const newId = (): string => randomUUID()` (de `expo-crypto`)
+- [X] T009 [P] Traer src/types/index.ts de la app Vite (`src/types/index.ts`) tal cual: `INotes`, `IsLoggedType`, `WaitingResponseType` y los re-exports de `./thinking`
+- [X] T010 Traer src/types/thinking.test.ts de la app Vite (`src/types/thinking.test.ts`) adaptado a Jest (mismo regex de UUID v4, `jest.spyOn(console, "warn")`) y verificar que falla; borrar src/lib/smoke.test.ts
+- [X] T011 Traer src/types/thinking.ts de la app Vite cambiando solo `uuidv4()` por `newId()` de `@/lib/id` (sin importar `uuid`) hasta que T010 pase
+- [X] T012 [P] Traer src/hooks/useDebounce.test.ts de la app Vite adaptado a Jest con timers falsos (`jest.useFakeTimers`, `renderHook` y `act` de `@testing-library/react-native`)
+- [X] T013 [P] Traer src/hooks/useDebounce.ts de la app Vite tal cual hasta que T012 pase
+- [X] T014 [P] Traer src/components/utils/reorder.test.ts de la app Vite adaptado a Jest
+- [X] T015 [P] Traer src/components/utils/reorder.ts de la app Vite tal cual (`moveNote`, `applyOrder`) hasta que T014 pase
+- [X] T016 Crear src/services/notes/repository.ts con el tipo `NotesDatabase` (la parte de `SQLiteDatabase` de `expo-sqlite` que se usa: `execAsync`, `runAsync`, `getAllAsync`, `getFirstAsync`, `withTransactionAsync`, expresada con `Pick<SQLiteDatabase, ...>`) y la interfaz `NotesRepository` exacta de contracts/notes-repository.md
+- [X] T017 Crear el adaptador de test src/services/notes/testing/nodeSqliteDatabase.ts: `createNodeSqliteDatabase(): NotesDatabase` sobre `DatabaseSync(":memory:")` de `node:sqlite`. Cada método async envuelve `prepare(sql).run/all/get(...params)`; `execAsync` usa `exec`; `withTransactionAsync(task)` hace `BEGIN`, `await task()` y `COMMIT`, o `ROLLBACK` y relanza si falla. Agregar también `createFailingDatabase(options: { failReads?: boolean; failWrites?: boolean; failOnWriteNumber?: number })`, que envuelve una base de node:sqlite real y rechaza todas las lecturas, todas las escrituras, o solo la N-ésima llamada a `runAsync` (para simular una falla a mitad de una transacción, T040); lo usan US2 y US4
+- [X] T018 Crear src/services/notes/database.test.ts: `migrateDatabase` sobre la base de node:sqlite crea la tabla `notes` con las columnas de data-model.md, deja `PRAGMA user_version = 1` y es idempotente si se llama dos veces
+- [X] T019 Crear src/services/notes/database.ts con `migrateDatabase(db: NotesDatabase)` (migración 0 → 1 de data-model.md, dentro de `withTransactionAsync`, con `PRAGMA user_version`) y `getDatabase()`: `openDatabaseAsync("thinking-notes.db")` + `migrateDatabase`, con la promesa memoizada y limpiada si falla; hasta que T018 pase
 
 **Checkpoint**: tipos, ids, debounce, reordenamiento y base migrada, todo con tests en verde.
 
