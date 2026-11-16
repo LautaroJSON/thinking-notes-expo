@@ -11,6 +11,11 @@ para **Android y web** desde un único código. Respondé y documentá en **espa
   Ante cualquier duda de stack, calidad o alcance, manda ella.
 - Flujo Spec Kit para todo lo no trivial: `/speckit-specify` → `/speckit-plan` →
   `/speckit-tasks` → `/speckit-implement`. Las specs viven en `specs/`.
+- Ramas y commits los maneja la extensión `git` de Spec Kit (`.specify/extensions.yml` y
+  `.specify/extensions/git/git-config.yml`): `/speckit-specify` crea la rama `NNN-slug`
+  desde `master` y cada comando hace commit al empezar y al terminar. Los hooks de
+  `extensions.yml` son obligatorios: ejecutarlos siempre, no solo sugerirlos.
+  Si `/speckit-specify` arranca fuera de `master`, volver a `master` antes de crear la rama.
 - Código de una sola plataforma (DOM, `window`, Web Audio, IndexedDB, módulos nativos)
   **solo** en `src/platform/`, con interfaz común e implementaciones `.web.ts` / `.native.ts`.
   Nada de `div`, `span` ni CSS: solo primitivas de React Native y `StyleSheet`.
@@ -19,6 +24,8 @@ para **Android y web** desde un único código. Respondé y documentá en **espa
 - Antes de dar algo por terminado: `npx tsc --noEmit`, `npx expo lint`, `npm test` y
   `npx expo export --platform web`.
 - Commits: Conventional Commits en español (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `ci:`).
+  También los automáticos de Spec Kit (`commit_style: conventional`): el mensaje se genera
+  del diff, en español, y lleva la línea `Co-Authored-By` en el archivo de mensaje.
 
 ## Migración en curso
 
