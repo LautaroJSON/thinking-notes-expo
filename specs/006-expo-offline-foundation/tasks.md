@@ -38,13 +38,13 @@ implementación y verificar que falla.
 
 **Purpose**: dejar corriendo los cuatro gates sobre el proyecto vacío.
 
-- [ ] T001 Instalar las dependencias de runtime con `npx expo install expo-sqlite expo-crypto` y verificar que quedan en `dependencies` de package.json con versiones `~58.x`
-- [ ] T002 Instalar las dependencias de test con `npx expo install jest-expo jest @types/jest @testing-library/react-native -- --dev` (en SDK 58, `jest-expo` requiere Jest 30) en package.json
-- [ ] T003 Configurar Jest en package.json: script `"test": "jest"` y bloque `"jest": { "preset": "jest-expo", "setupFiles": ["<rootDir>/jest.setup.ts"] }`
-- [ ] T004 Crear jest.setup.ts con `jest.mock("expo-crypto", () => ({ randomUUID: () => require("node:crypto").randomUUID() }))` (research R6) y `jest.mock("expo-sqlite", () => ({ openDatabaseAsync: jest.fn(() => Promise.reject(new Error("expo-sqlite no está disponible en Jest"))) }))`, así importar el proveedor o el repositorio por defecto no carga el módulo nativo; los tests usan siempre el adaptador de node:sqlite o un repositorio falso
-- [ ] T005 Agregar los tipos de Jest a TypeScript (`"types": ["jest"]` en compilerOptions de tsconfig.json, o `/// <reference types="jest" />` en jest.setup.ts si `types` rompe los tipos de Expo) y confirmar con `npx tsc --noEmit`
-- [ ] T006 [P] Correr `npx expo lint` por primera vez para generar eslint.config.js con `eslint-config-expo` y dejarlo en 0 errores y 0 warnings sobre el código actual
-- [ ] T007 Crear un test de humo temporal src/lib/smoke.test.ts (`expect(1).toBe(1)`) y confirmar que `npm test` corre en verde; borrarlo en cuanto exista el primer test real (T010)
+- [X] T001 Instalar las dependencias de runtime con `npx expo install expo-sqlite expo-crypto` y verificar que quedan en `dependencies` de package.json con versiones `~58.x`
+- [X] T002 Instalar las dependencias de test con `npx expo install jest-expo jest @types/jest @testing-library/react-native -- --dev` (en SDK 58, `jest-expo` requiere Jest 30) en package.json
+- [X] T003 Configurar Jest en package.json: script `"test": "jest"` y bloque `"jest": { "preset": "jest-expo", "setupFiles": ["<rootDir>/jest.setup.ts"] }`
+- [X] T004 Crear jest.setup.ts con `jest.mock("expo-crypto", () => ({ randomUUID: () => require("node:crypto").randomUUID() }))` (research R6) y `jest.mock("expo-sqlite", () => ({ openDatabaseAsync: jest.fn(() => Promise.reject(new Error("expo-sqlite no está disponible en Jest"))) }))`, así importar el proveedor o el repositorio por defecto no carga el módulo nativo; los tests usan siempre el adaptador de node:sqlite o un repositorio falso
+- [X] T005 Agregar los tipos de Jest a TypeScript (`"types": ["jest"]` en compilerOptions de tsconfig.json, o `/// <reference types="jest" />` en jest.setup.ts si `types` rompe los tipos de Expo) y confirmar con `npx tsc --noEmit`
+- [X] T006 [P] Correr `npx expo lint` por primera vez para generar eslint.config.js con `eslint-config-expo` y dejarlo en 0 errores y 0 warnings sobre el código actual
+- [X] T007 Crear un test de humo temporal src/lib/smoke.test.ts (`expect(1).toBe(1)`) y confirmar que `npm test` corre en verde; borrarlo en cuanto exista el primer test real (T010)
 
 **Checkpoint**: `npx tsc --noEmit`, `npx expo lint` y `npm test` pasan.
 
