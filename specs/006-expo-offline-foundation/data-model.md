@@ -36,7 +36,9 @@ desconocidos se cargan y se vuelven a guardar intactos.
 - `IsLoggedType = "online" | "offline" | "loading"`: arranca en `"loading"` y en esta etapa
   pasa siempre a `"offline"` después de montar (FR-016).
 - `WaitingResponseType`: el mismo conjunto que en la app Vite. En esta etapa solo se usa
-  `"gettingNotes"` (carga inicial) y `"none"`.
+  `"gettingNotes"` (carga inicial) y `"none"`. El estado de las escrituras (crear, guardar,
+  borrar, reordenar) se expone con `loadingSaveNote` (ver contracts/notes-context.md,
+  sección "Pendiente").
 
 ## Esquema SQLite (`thinking-notes.db`)
 
@@ -91,8 +93,9 @@ Calca `loadNotesFromStorage` de la app Vite:
 | `waitingResponse` | `"none"` | `"gettingNotes"` mientras carga, después `"none"`. |
 | `notes` | `[]` | Carga; crear (se agrega al final); guardar (reemplaza la nota); borrar; reordenar. |
 | `activeNoteState` | `null` | `setActiveNote`, `addNote` (la nueva), `closeActiveNote` / `deleteNote` → `null`. |
-| `loadingSaveNote` (pendiente) | `false` | `true` con `updateActiveNote` o `removeThinking`; `false` solo cuando el guardado **termina bien**. |
-| `saveError` | `null` | Mensaje si falla un guardado; se limpia con el siguiente guardado exitoso. |
+| `unsavedIds` (ref interna) | vacío | Entra una nota si falla su creación o guardado; sale cuando un guardado de esa nota termina bien o cuando se borra. |
+| `loadingSaveNote` (pendiente) | `false` | `true` si hay ediciones de la activa sin guardar, `unsavedIds` no vacío o una escritura en curso; `false` solo si no pasa nada de eso. |
+| `saveError` | `null` | Mensaje si falla crear, guardar o borrar; se limpia cuando un guardado termina bien y no quedan notas sin guardar. |
 | `loadError` | `null` | Mensaje si falla la carga inicial. |
 | `reorderError` | `null` | Mensaje si falla el orden; `clearReorderError()` lo limpia. |
 
@@ -102,7 +105,14 @@ Ciclo del guardado de la nota activa:
 editar ──► pendiente (loadingSaveNote = true)
    │            │ 2 s sin cambios, o cerrar / cambiar de nota / borrar thinking
    ▼            ▼
- (más ediciones reinician el debounce)   guardar(snapshot)
-                                          ├─ ok    → notes[i] = snapshot + updatedAt; pendiente = false; saveError = null
-                                          └─ error → pendiente sigue true; saveError = mensaje; el contenido queda en memoria
+ (más ediciones reinician el debounce)   notes[i] = snapshot (en memoria, siempre)
+                                          guardar(snapshot) y luego reintentar unsavedIds
+                                          ├─ ok    → updatedAt; sale de unsavedIds; si no queda nada: pendiente = false, saveError = null
+                                          └─ error → entra a unsavedIds; pendiente sigue true; saveError = mensaje
+
+crear ──► nota en notes + activa ──► createNote
+                                      └─ error → entra a unsavedIds (el próximo saveNote la inserta)
+
+borrar ──► se quita de notes ──► deleteNote
+                                  └─ error → vuelve a notes en su posición; saveError = "No se pudo borrar la nota."
 ```

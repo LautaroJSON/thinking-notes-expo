@@ -95,6 +95,10 @@ código de la app Vite (`~/codigo/Proyectos/thinking-notes`) y pruebas locales.
   - Mockear `expo-sqlite` con funciones vacías: no prueba el SQL.
 - **Nota**: `node:sqlite` emite un `ExperimentalWarning` en Node 24. Es inofensivo. CI debe
   usar Node ≥ 22.5.
+- **Pendiente para la 008**: el preset `jest-expo` resuelve los módulos como una sola
+  plataforma nativa. Cuando existan implementaciones `.web.ts` / `.native.ts` en
+  `src/platform`, evaluar `jest-expo/universal` para correr los tests en las dos plataformas.
+  En esta etapa no hay código de plataforma, así que no hace falta.
 
 ## R6. Identificadores: `expo-crypto` en lugar de `uuid`
 

@@ -153,10 +153,16 @@ almacenamiento local y verifican el estado resultante.
 1. **Given** que guardar una nota falla, **When** se intenta el guardado automático,
    **Then** el contenido sigue en pantalla, no se marca como guardado, se registra el
    error y el siguiente guardado vuelve a intentar con el contenido más reciente.
-2. **Given** que crear o borrar una nota no se puede guardar, **When** ocurre la falla,
-   **Then** la lista en pantalla refleja la acción del usuario y el error queda
-   registrado (igual que en la app Vite).
-3. **Given** que leer las notas falla al abrir la app, **When** termina la carga, **Then**
+2. **Given** que una nota nueva no se puede guardar, **When** ocurre la falla, **Then** la
+   nota queda en la lista como "sin guardar", la app muestra el error y la vuelve a
+   guardar en el siguiente intento de guardado.
+3. **Given** que borrar una nota no se puede guardar, **When** ocurre la falla, **Then** la
+   nota vuelve a aparecer en la lista en su lugar y la app muestra "No se pudo borrar la
+   nota.".
+4. **Given** una nota con cambios sin guardar, **When** cambio de nota o la cierro y ese
+   guardado falla, **Then** los cambios siguen en memoria (al volver a abrirla los veo),
+   la app sigue mostrando "pendiente" y los reintenta en el siguiente guardado.
+5. **Given** que leer las notas falla al abrir la app, **When** termina la carga, **Then**
    la app queda usable con la lista vacía, informa el error y **no** sobrescribe con una
    lista vacía las notas que pudieran estar guardadas.
 
@@ -207,7 +213,8 @@ la constitución.
 1. **Given** la pantalla de verificación, **When** la uso, **Then** puedo: ver la lista de
    notas; crear una; abrirla como activa; editar el título; agregar, editar y borrar
    thinkings de texto; borrar la nota; mover una nota hacia arriba o abajo; y ver si hay
-   cambios pendientes o guardados.
+   cambios pendientes o guardados. En desarrollo, también puedo crear 200 notas de prueba
+   para medir SC-005.
 2. **Given** la pantalla, **When** se revisa el código, **Then** usa solo primitivas de
    React Native y está marcada como temporal, a reemplazar en la etapa de interfaz.
 
@@ -226,7 +233,7 @@ la constitución.
   se vuelven a guardar intactos aunque esta etapa no permita crearlos ni editarlos.
 - **Reordenar con ids inexistentes o la misma posición**: no hace nada.
 - **Borrar la nota activa**: deja de haber nota activa.
-- **Muchas notas** (cientos): carga y guardado siguen sin demoras perceptibles.
+- **Muchas notas** (cientos): ver SC-005.
 - **Web sin aislamiento entre orígenes** (cabeceras ausentes): el almacenamiento local no
   funciona; por eso las cabeceras son requisito tanto en desarrollo como desplegada.
 
@@ -242,8 +249,8 @@ la constitución.
   estado de sesión, estado de espera) y la normalización de thinkings DEBEN traerse de la
   app Vite sin cambiar su comportamiento observable.
 - **FR-003**: Las utilidades puras `dates`, `reorder`, `noteLaunch`, `dictation` y
-  `copyNote` DEBEN traerse tal cual, con sus tests adaptados, sin depender de APIs de una
-  sola plataforma. Los tipos que necesiten de otros módulos (por ejemplo, el identificador
+  `copyNote`, y el hook `useDebounce`, DEBEN traerse tal cual, con sus tests adaptados,
+  sin depender de APIs de una sola plataforma. Los tipos que necesiten de otros módulos (por ejemplo, el identificador
   de animación que usa `noteLaunch`) se traen como tipos, sin la lógica asociada.
 
 **Persistencia local**
@@ -270,7 +277,11 @@ la constitución.
   segundos sin cambios, y de inmediato al cerrar o cambiar de nota o al borrar un
   thinking; el guardado actualiza la fecha de modificación.
 - **FR-011**: La app DEBE exponer en todo momento si hay cambios pendientes de guardar o
-  si todo está guardado, y el estado de carga inicial de las notas.
+  si todo está guardado, y el estado de carga inicial de las notas. "Pendiente" incluye
+  cualquier escritura en curso o fallida: editar, crear, borrar y reordenar.
+- **FR-011b**: Toda falla al guardar (crear, editar, borrar, reordenar) DEBE ser visible
+  para el usuario y recuperable: lo no guardado se reintenta en el siguiente guardado y
+  un borrado fallido vuelve a mostrar la nota.
 - **FR-012**: El usuario DEBE poder borrar una nota; si era la activa, deja de haber nota
   activa.
 - **FR-013**: El usuario DEBE poder mover una nota a la posición de otra; el orden se
@@ -343,6 +354,8 @@ Hacer en un emulador o dispositivo Android y en la web (desarrollo y despliegue)
 6. Borrar una nota y volver a reabrir/recargar: no reaparece.
 7. En web, comprobar en las herramientas del navegador que las respuestas traen las
    cabeceras COOP/COEP.
+8. En Android, con el botón de desarrollo "Crear 200 notas de prueba", cerrar y reabrir
+   la app y medir cuánto tarda en aparecer la lista (SC-005: menos de 1 segundo).
 
 ## Assumptions
 
@@ -356,6 +369,10 @@ Hacer en un emulador o dispositivo Android y en la web (desarrollo y despliegue)
   temporizador y los cambios de esos últimos 2 segundos no se guardan. Acá se guardan de
   inmediato al dejar la nota (FR-010): es la misma regla del principio I y no cambia la
   experiencia.
+- En la app Vite, si falla guardar una nota nueva o un borrado, solo se registra en
+  consola: la pantalla muestra algo distinto de lo guardado, sin aviso. Acá el error se
+  muestra, la nota nueva se reintenta y el borrado fallido vuelve a mostrar la nota
+  (FR-011b; principio II: "nunca fallar en silencio").
 - En la app Vite, una falla de lectura deja la lista vacía y la siguiente escritura podía
   pisar los datos guardados. Acá la lista también queda vacía, pero no se sobrescribe lo
   guardado (requisito explícito del pedido: no perder lo escrito).

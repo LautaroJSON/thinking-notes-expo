@@ -38,7 +38,7 @@
   tablas, librería de mocks, configuración de Jest, middleware de cabeceras) quedan para
   `/speckit-plan`.
 - SC-006 nombra los gates por su función (typecheck, lint, tests, export web).
-- Tres desvíos declarados respecto de la app Vite, todos para cumplir los principios I/II
+- Cuatro desvíos declarados respecto de la app Vite, todos para cumplir los principios I/II
   (no perder lo escrito, estado pendiente/guardado visible): falla de guardado queda como
-  pendiente; falla de lectura no sobrescribe; guardado inmediato al cerrar/cambiar de nota.
+  pendiente; falla de lectura no sobrescribe; guardado inmediato al cerrar/cambiar de nota; fallas al crear/borrar visibles y recuperables (agregado tras /speckit-analyze).
   Están en Assumptions para que el usuario los confirme o los rechace en `/speckit-clarify`.

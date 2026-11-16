@@ -33,7 +33,7 @@ Enfoque técnico:
 Todas se instalan con `npx expo install`. `uuid` no se trae (ver R6).
 
 **Storage**: SQLite (`thinking-notes.db`) mediante `expo-sqlite` en Android (nativo) y web
-(wasm + OPFS, requiere aislamiento entre orígenes)
+(wasm, requiere aislamiento entre orígenes)
 
 **Testing**: Jest 30 con preset `jest-expo`, `@testing-library/react-native` para el
 contexto y `node:sqlite` en memoria para probar SQL real en el repositorio
@@ -70,7 +70,7 @@ base, id), 1 pantalla temporal
 | **Restricción: PWA** | Todavía no hay manifest ni service worker en el repo Expo, así que no hay nada que romper. La PWA llega con la interfaz (009+). | ✅ (n/a) |
 | **Restricción: rutas** | `src/app/` solo tiene `_layout.tsx` (proveedor) e `index.tsx`, que monta la pantalla temporal desde `src/components/dev/`. | ✅ |
 | **Restricción: capa de red / secretos** | Sin red ni secretos. La persistencia vive en `src/services/notes`. | ✅ |
-| **Migración** | Se iguala el comportamiento de la app Vite. Los tres desvíos de la spec (guardado fallido sigue pendiente, la lectura fallida no sobrescribe, guardado inmediato al cambiar de nota) aplican los principios I y II y no agregan funcionalidad. | ✅ |
+| **Migración** | Se iguala el comportamiento de la app Vite. Los cuatro desvíos de la spec (guardado fallido sigue pendiente, la lectura fallida no sobrescribe, guardado inmediato al cambiar de nota, fallas al crear o borrar visibles y recuperables) aplican los principios I y II y no agregan funcionalidad. | ✅ |
 | **Thinkings no se reordenan** | No hay ninguna operación que los reordene (FR-014). | ✅ |
 
 **Re-check post-diseño (Fase 1)**: sin cambios. Los contratos y el modelo de datos no
@@ -158,4 +158,4 @@ solo existía para `localStorage`.
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | Principio I: solo modo sin cuenta en esta etapa | La migración es por capas (constitución); sesión, Supabase y sincronización son la spec 007 | Meter los dos modos en una sola spec la vuelve demasiado grande para revisar y verificar. El diseño (`NotesRepository` intercambiable, `isLogged`) evita rehacer esta capa. |
-| Desvíos del comportamiento de la app Vite (3, listados en la spec) | Los principios I y II prohíben perder lo escrito y mostrar "guardado" cuando no lo está | Calcar la app Vite reproduciría pérdidas de datos conocidas. |
+| Desvíos del comportamiento de la app Vite (4, listados en la spec) | Los principios I y II prohíben perder lo escrito, mostrar "guardado" cuando no lo está y fallar en silencio | Calcar la app Vite reproduciría pérdidas de datos conocidas. |
