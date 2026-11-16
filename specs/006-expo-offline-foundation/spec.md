@@ -357,6 +357,17 @@ Hacer en un emulador o dispositivo Android y en la web (desarrollo y despliegue)
 8. En Android, con el botón de desarrollo "Crear 200 notas de prueba", cerrar y reabrir
    la app y medir cuánto tarda en aparecer la lista (SC-005: menos de 1 segundo).
 
+## Limitaciones conocidas
+
+- **Cabeceras COOP/COEP en la raíz `/` del servidor de desarrollo web**: con
+  `web.output: "single"`, Expo CLI (SDK 58) sirve `/` con su middleware de manifiesto,
+  que va primero y no deja agregar cabeceras. Ni `config.server.enhanceMiddleware` de
+  Metro ni la opción `headers` del plugin `expo-router` llegan a esa respuesta. El resto
+  de las rutas y los bundles sí las llevan. En producción (Vercel) las lleva todo.
+  Durante la implementación se verificó en Chromium que, aun sin aislamiento, la versión
+  actual de `expo-sqlite` guarda y persiste en `/`. El impacto en desarrollo es nulo en
+  Chromium; en otros navegadores no se verificó. Pendiente de decisión (ver T039).
+
 ## Assumptions
 
 - El retraso de guardado automático es de 2 segundos, el valor que usa el editor de la

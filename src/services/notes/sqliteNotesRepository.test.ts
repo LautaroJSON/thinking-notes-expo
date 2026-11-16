@@ -400,4 +400,31 @@ describe("sqliteNotesRepository", () => {
       expect((await repo.loadNotes()).map((n) => n.id)).toEqual(["b"]);
     });
   });
+
+  it("carga 200 notas con 10 thinkings cada una, en orden (referencia de SC-005)", async () => {
+    const { repo } = await setup();
+    for (let i = 0; i < 200; i++) {
+      await repo.createNote(
+        note(`n${i}`, {
+          thinkings: Array.from({ length: 10 }, (_, j) => ({
+            id: `n${i}-${j}`,
+            type: "text",
+            value: `idea ${j}`,
+          })),
+        }),
+      );
+    }
+
+    const started = Date.now();
+    const loaded = await repo.loadNotes();
+    const elapsed = Date.now() - started;
+
+    expect(loaded).toHaveLength(200);
+    expect(loaded.map((n) => n.id)).toEqual(
+      Array.from({ length: 200 }, (_, i) => `n${i}`),
+    );
+    expect(loaded[199].thinkings).toHaveLength(10);
+    // En Node es muy holgado; la medición real es en un Android (T053)
+    expect(elapsed).toBeLessThan(1000);
+  });
 });

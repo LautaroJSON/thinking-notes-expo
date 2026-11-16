@@ -1,56 +1,67 @@
-# Welcome to your Expo app 👋
+# Thinking Notes (Expo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App minimalista para capturar ideas en notas y "thinkings", hecha con Expo / React Native
+para **Android y web** desde un único código. Reemplaza a la app Vite
+([thinking-notes](https://github.com/LautaroJSON/thinking-notes)); la migración se hace por
+etapas, cada una con su spec en [`specs/`](specs/).
 
-## Get started
+**Estado**: etapa 1 (spec 006). Las notas sin cuenta se guardan en SQLite en Android y en
+web. La interfaz es una pantalla temporal de verificación; la definitiva llega en una spec
+posterior.
 
-1. Install dependencies
+## Requisitos
 
-   ```bash
-   npm install
-   ```
+- Node.js ≥ 22.13 (lo pide React Native Testing Library; los tests también usan
+  `node:sqlite`, disponible desde Node 22.5).
+- Android: [Expo Go](https://expo.dev/go) en un dispositivo o emulador.
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Correr la app
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+```bash
+npx expo start
+```
 
-### Other setup steps
+Desde ahí se abre en Android (Expo Go) o en web (tecla `w`).
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+En web, SQLite necesita aislamiento entre orígenes (cabeceras COOP/COEP). En producción las
+sirve `vercel.json`. En desarrollo las agregan `metro.config.js` y `app.json`, salvo en la
+raíz `/`: Expo CLI la sirve con un middleware propio que no permite agregar cabeceras (ver
+la sección "Limitaciones conocidas" de la spec 006).
 
-## Learn more
+## Gates de calidad
 
-To learn more about developing your project with Expo, look at the following resources:
+Los cuatro deben pasar antes de dar algo por terminado:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx tsc --noEmit
+```
 
-## Join the community
+```bash
+npx expo lint
+```
 
-Join our community of developers creating universal apps.
+```bash
+npm test
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo export --platform web
+```
+
+## Estructura
+
+- `src/app/`: pantallas y layouts de Expo Router (solo rutas).
+- `src/context/`, `src/hooks/`: estado de notas (`NotesProvider`, `useNotes`).
+- `src/services/notes/`: almacenamiento local (repositorio SQLite y migraciones).
+- `src/types/`, `src/components/utils/`: tipos del dominio y utilidades puras.
+- `specs/`: specs de Spec Kit; la constitución está en `.specify/memory/constitution.md`.
+
+## Flujo de trabajo
+
+Spec Kit: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement`.
+`/speckit-specify` crea la rama `NNN-slug` desde `master`, y cada comando hace commit al
+empezar y al terminar. Los commits siguen Conventional Commits en español.

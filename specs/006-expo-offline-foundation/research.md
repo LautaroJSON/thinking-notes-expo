@@ -35,6 +35,11 @@ código de la app Vite (`~/codigo/Proyectos/thinking-notes`) y pruebas locales.
   soporta `credentialless`**: en Safari (incluido Safari en iPhone, que es "web móvil") la
   página no quedaría aislada y SQLite no funcionaría. `require-corp` funciona en Chrome,
   Firefox y Safari, y es lo que pide la spec (FR-017).
+- **Hallazgo en la implementación**: en desarrollo, `config.server.enhanceMiddleware`
+  no alcanza a la raíz `/`, que Expo CLI sirve antes con su middleware de manifiesto
+  (modo `single`). Se agregó también la opción `headers` del plugin `expo-router` en
+  `app.json`, que según la doc aplica al HTML del servidor de desarrollo, pero tampoco
+  cubre `/` en modo `single`. Ver "Limitaciones conocidas" en la spec.
 - **Consecuencia para specs futuras**: con `require-corp`, los recursos de otro origen
   (imágenes de Supabase Storage o avatares de Google en la 007/008) tienen que servirse con
   CORS (atributo `crossOrigin`) o con `Cross-Origin-Resource-Policy`. Queda anotado para

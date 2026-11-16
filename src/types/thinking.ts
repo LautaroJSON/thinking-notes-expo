@@ -123,7 +123,7 @@ const parseThinkingObject = (
 };
 
 /**
- * Normaliza una lista de pensamientos que viene de afuera (localStorage o API).
+ * Normaliza una lista de pensamientos que viene de afuera (almacenamiento local o API).
  * Convierte el formato anterior (`string[]`) a pensamientos de texto, descarta
  * los elementos inválidos y garantiza ids únicos. `migrated` indica si hubo que
  * cambiar algo, para reescribir los datos guardados una sola vez.
