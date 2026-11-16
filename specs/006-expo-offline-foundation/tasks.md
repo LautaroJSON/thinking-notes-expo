@@ -142,13 +142,13 @@ a mano, paso 4 de la verificación de la spec.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T040 [P] [US2] Agregar a src/services/notes/sqliteNotesRepository.test.ts: `saveOrder(["c","a","b"])` hace que `loadNotes` devuelva C, A, B; ignora ids desconocidos; no cambia `updated_at`; con una falla a mitad de la transacción, el orden guardado queda como estaba
-- [ ] T041 [P] [US2] Agregar a src/context/notesContext.test.tsx (casos de `reorderNotes` offline de la app Vite): reordena y llama a `saveOrder` con los ids nuevos; soltar en la misma posición o con un id inexistente no llama a nada; mantiene abierta la nota activa; no cambia `updatedAt`; si `saveOrder` rechaza vuelve al orden anterior conservando una edición de contenido hecha mientras tanto y expone `reorderError = "No se pudo guardar el orden de las notas."`; `clearReorderError` lo limpia y tiene identidad estable
+- [X] T040 [P] [US2] Agregar a src/services/notes/sqliteNotesRepository.test.ts: `saveOrder(["c","a","b"])` hace que `loadNotes` devuelva C, A, B; ignora ids desconocidos; no cambia `updated_at`; con una falla a mitad de la transacción, el orden guardado queda como estaba
+- [X] T041 [P] [US2] Agregar a src/context/notesContext.test.tsx (casos de `reorderNotes` offline de la app Vite): reordena y llama a `saveOrder` con los ids nuevos; soltar en la misma posición o con un id inexistente no llama a nada; mantiene abierta la nota activa; no cambia `updatedAt`; si `saveOrder` rechaza vuelve al orden anterior conservando una edición de contenido hecha mientras tanto y expone `reorderError = "No se pudo guardar el orden de las notas."`; `clearReorderError` lo limpia y tiene identidad estable
 
 ### Implementation for User Story 2
 
-- [ ] T042 [US2] Implementar `saveOrder(ids)` en src/services/notes/sqliteNotesRepository.ts (`UPDATE notes SET position = ? WHERE id = ?` por índice, en una sola `withTransactionAsync`, dentro de la cola de escrituras) hasta que T040 pase
-- [ ] T043 [US2] Implementar `reorderNotes` y `clearReorderError` en src/context/notesContext.tsx igual que en la app Vite (`moveNote`, no-op por referencia, `applyOrder` para revertir) usando `repository.saveOrder`, hasta que T041 pase
+- [X] T042 [US2] Implementar `saveOrder(ids)` en src/services/notes/sqliteNotesRepository.ts (`UPDATE notes SET position = ? WHERE id = ?` por índice, en una sola `withTransactionAsync`, dentro de la cola de escrituras) hasta que T040 pase
+- [X] T043 [US2] Implementar `reorderNotes` y `clearReorderError` en src/context/notesContext.tsx igual que en la app Vite (`moveNote`, no-op por referencia, `applyOrder` para revertir) usando `repository.saveOrder`, hasta que T041 pase
 
 **Checkpoint**: US1 + US2 funcionan; el orden sobrevive a reabrir.
 
@@ -164,11 +164,11 @@ node:sqlite.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T044 [US3] Adaptar a src/services/notes/sqliteNotesRepository.test.ts los casos de src/components/utils/index.test.ts de la app Vite, insertando filas a mano con SQL: thinkings `["uno","dos"]` → dos `TextThinking` con UUIDs nuevos en orden, y la columna `thinkings` reescrita con el formato nuevo; una segunda carga devuelve los mismos ids y no reescribe (espiar `runAsync`); thinkings válidos no se reescriben; inválidos se descartan con `console.warn`; tipo desconocido intacto; ids repetidos → id nuevo; `title` no textual → `""`; `created_at`/`updated_at` `NULL` → campos ausentes; JSON inválido en `thinkings` → nota con `thinkings: []`, `console.error` y la fila **sin** reescribir
+- [X] T044 [US3] Adaptar a src/services/notes/sqliteNotesRepository.test.ts los casos de src/components/utils/index.test.ts de la app Vite, insertando filas a mano con SQL: thinkings `["uno","dos"]` → dos `TextThinking` con UUIDs nuevos en orden, y la columna `thinkings` reescrita con el formato nuevo; una segunda carga devuelve los mismos ids y no reescribe (espiar `runAsync`); thinkings válidos no se reescriben; inválidos se descartan con `console.warn`; tipo desconocido intacto; ids repetidos → id nuevo; `title` no textual → `""`; `created_at`/`updated_at` `NULL` → campos ausentes; JSON inválido en `thinkings` → nota con `thinkings: []`, `console.error` y la fila **sin** reescribir
 
 ### Implementation for User Story 3
 
-- [ ] T045 [US3] Completar `loadNotes` en src/services/notes/sqliteNotesRepository.ts: `JSON.parse` protegido por fila (`unknown`), `parseThinkings`, y reescritura en una transacción solo de la columna `thinkings` de las notas con `migrated = true` (nunca las de JSON inválido), hasta que T044 pase
+- [X] T045 [US3] Completar `loadNotes` en src/services/notes/sqliteNotesRepository.ts: `JSON.parse` protegido por fila (`unknown`), `parseThinkings`, y reescritura en una transacción solo de la columna `thinkings` de las notas con `migrated = true` (nunca las de JSON inválido), hasta que T044 pase
 
 **Checkpoint**: la normalización da el mismo resultado que la app Vite (SC-002).
 
@@ -184,13 +184,13 @@ falso que rechaza (contexto).
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T046 [P] [US4] Agregar a src/services/notes/sqliteNotesRepository.test.ts con `createFailingDatabase`: `loadNotes` rechaza si falla la lectura y no hace ninguna escritura; `saveNote`, `createNote` y `deleteNote` rechazan con el error original sin dejar la fila a medias; una escritura que falla no bloquea la siguiente en la cola
-- [ ] T047 [P] [US4] Agregar a src/context/notesContext.test.tsx: si `loadNotes` rechaza, queda `notes = []`, `waitingResponse = "none"`, `loadError = "No se pudieron cargar las notas."` y no se llama a ningún método de escritura; si `saveNote` rechaza, el contenido sigue en `activeNoteState`, `loadingSaveNote` sigue `true`, `saveError = "No se pudieron guardar los cambios."`, y el siguiente guardado exitoso pone `saveError = null` y `loadingSaveNote = false`; si `saveNote` rechaza al cambiar de nota (`setActiveNote(otra)`), la nota dejada conserva sus cambios en `notes`, al volver a abrirla se ven, `loadingSaveNote` sigue `true` y el siguiente guardado (por ejemplo, un autosave de la otra nota) llama a `saveNote` también con ella; si `createNote` rechaza, la nota sigue en la lista, `saveError` tiene el mensaje y el siguiente guardado llama a `saveNote` con esa nota (upsert); si `deleteNote` rechaza, la nota vuelve a `notes` en su posición original y `saveError = "No se pudo borrar la nota."`; una edición hecha mientras un guardado está en vuelo deja `loadingSaveNote = true` al terminar ese guardado
+- [X] T046 [P] [US4] Agregar a src/services/notes/sqliteNotesRepository.test.ts con `createFailingDatabase`: `loadNotes` rechaza si falla la lectura y no hace ninguna escritura; `saveNote`, `createNote` y `deleteNote` rechazan con el error original sin dejar la fila a medias; una escritura que falla no bloquea la siguiente en la cola
+- [X] T047 [P] [US4] Agregar a src/context/notesContext.test.tsx: si `loadNotes` rechaza, queda `notes = []`, `waitingResponse = "none"`, `loadError = "No se pudieron cargar las notas."` y no se llama a ningún método de escritura; si `saveNote` rechaza, el contenido sigue en `activeNoteState`, `loadingSaveNote` sigue `true`, `saveError = "No se pudieron guardar los cambios."`, y el siguiente guardado exitoso pone `saveError = null` y `loadingSaveNote = false`; si `saveNote` rechaza al cambiar de nota (`setActiveNote(otra)`), la nota dejada conserva sus cambios en `notes`, al volver a abrirla se ven, `loadingSaveNote` sigue `true` y el siguiente guardado (por ejemplo, un autosave de la otra nota) llama a `saveNote` también con ella; si `createNote` rechaza, la nota sigue en la lista, `saveError` tiene el mensaje y el siguiente guardado llama a `saveNote` con esa nota (upsert); si `deleteNote` rechaza, la nota vuelve a `notes` en su posición original y `saveError = "No se pudo borrar la nota."`; una edición hecha mientras un guardado está en vuelo deja `loadingSaveNote = true` al terminar ese guardado
 
 ### Implementation for User Story 4
 
-- [ ] T048 [US4] Completar el manejo de errores en src/services/notes/sqliteNotesRepository.ts (cola que sigue después de un rechazo, sin escrituras en el camino de lectura) hasta que T046 pase
-- [ ] T049 [US4] Completar el manejo de errores en src/context/notesContext.tsx según contracts/notes-context.md: `loadError`; `saveError`; ref `unsavedIds` (entra al fallar crear o guardar, sale al guardar bien o al borrar); reintento de `unsavedIds` después de cada guardado; restaurar la nota en su posición si falla `deleteNote` (`applyOrder` con el orden previo); comparación con el snapshot; `console.error` además del mensaje visible. Seguir hasta que T047 pase
+- [X] T048 [US4] Completar el manejo de errores en src/services/notes/sqliteNotesRepository.ts (cola que sigue después de un rechazo, sin escrituras en el camino de lectura) hasta que T046 pase
+- [X] T049 [US4] Completar el manejo de errores en src/context/notesContext.tsx según contracts/notes-context.md: `loadError`; `saveError`; ref `unsavedIds` (entra al fallar crear o guardar, sale al guardar bien o al borrar); reintento de `unsavedIds` después de cada guardado; restaurar la nota en su posición si falla `deleteNote` (`applyOrder` con el orden previo); comparación con el snapshot; `console.error` además del mensaje visible. Seguir hasta que T047 pase
 
 **Checkpoint**: SC-003 cubierto por tests.
 

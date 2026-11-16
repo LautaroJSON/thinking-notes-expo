@@ -69,6 +69,7 @@ describe("NotesProvider (sin sesión)", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it("useNotes fuera del proveedor lanza un error claro", async () => {
@@ -256,5 +257,205 @@ describe("NotesProvider (sin sesión)", () => {
     await advance(DELAY);
 
     expect(result.current.saveUpdatesNotesOnDBorLocalStorage).toBe(first);
+  });
+
+  describe("reorderNotes (US2)", () => {
+    const ids = (notes: INotes[]) => notes.map((n) => n.id);
+
+    it("reordena las notas y guarda el orden", async () => {
+      const repo = fakeRepository([note("a"), note("b"), note("c")]);
+      const { result } = await renderNotes(repo);
+
+      await act(async () => result.current.reorderNotes("c", "a"));
+
+      expect(ids(result.current.notes)).toEqual(["c", "a", "b"]);
+      expect(repo.saveOrder).toHaveBeenCalledWith(["c", "a", "b"]);
+      expect(result.current.reorderError).toBeNull();
+    });
+
+    it("no guarda nada si se suelta en la misma posición o con un id inexistente", async () => {
+      const repo = fakeRepository([note("a"), note("b")]);
+      const { result } = await renderNotes(repo);
+      const before = result.current.notes;
+
+      await act(async () => result.current.reorderNotes("a", "a"));
+      await act(async () => result.current.reorderNotes("x", "a"));
+
+      expect(result.current.notes).toBe(before);
+      expect(repo.saveOrder).not.toHaveBeenCalled();
+    });
+
+    it("mantiene abierta la nota activa y no cambia updatedAt", async () => {
+      const repo = fakeRepository([note("a"), note("b")]);
+      const { result } = await renderNotes(repo);
+      await act(async () => result.current.setActiveNote("a"));
+
+      await act(async () => result.current.reorderNotes("b", "a"));
+
+      expect(result.current.activeNoteState?.id).toBe("a");
+      expect(result.current.notes.map((n) => n.updatedAt)).toEqual([
+        "2026-11-01T10:00:00.000Z",
+        "2026-11-01T10:00:00.000Z",
+      ]);
+    });
+
+    it("si falla vuelve al orden anterior sin perder cambios de contenido y avisa", async () => {
+      const repo = fakeRepository([note("a"), note("b"), note("c")]);
+      const order = deferred<void>();
+      repo.saveOrder.mockReturnValueOnce(order.promise);
+      const { result } = await renderNotes(repo);
+      await act(async () => result.current.setActiveNote("b"));
+
+      await act(async () => {
+        void result.current.reorderNotes("c", "a");
+      });
+      // Mientras se guarda el orden, se edita una nota y se la deja
+      await act(async () => result.current.updateActiveNote({ title: "B editada" }));
+      await act(async () => result.current.closeActiveNote());
+      await act(async () => order.reject(new Error("falla")));
+
+      expect(ids(result.current.notes)).toEqual(["a", "b", "c"]);
+      expect(result.current.notes[1].title).toBe("B editada");
+      expect(result.current.reorderError).toBe(
+        "No se pudo guardar el orden de las notas.",
+      );
+    });
+
+    it("clearReorderError limpia el error y tiene identidad estable", async () => {
+      const repo = fakeRepository([note("a"), note("b")]);
+      repo.saveOrder.mockRejectedValueOnce(new Error("falla"));
+      jest.spyOn(console, "error").mockImplementation(() => {});
+      const { result } = await renderNotes(repo);
+      const clear = result.current.clearReorderError;
+
+      await act(async () => result.current.reorderNotes("b", "a"));
+      expect(result.current.reorderError).not.toBeNull();
+
+      await act(async () => result.current.clearReorderError());
+      expect(result.current.reorderError).toBeNull();
+      expect(result.current.clearReorderError).toBe(clear);
+    });
+  });
+
+  describe("fallas del almacenamiento (US4)", () => {
+    beforeEach(() => {
+      jest.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    it("si falla la carga queda usable, avisa y no escribe nada", async () => {
+      const repo = fakeRepository();
+      repo.loadNotes.mockRejectedValueOnce(new Error("lectura"));
+
+      const { result } = await renderNotes(repo);
+
+      expect(result.current.notes).toEqual([]);
+      expect(result.current.waitingResponse).toBe("none");
+      expect(result.current.loadError).toBe("No se pudieron cargar las notas.");
+      expect(repo.createNote).not.toHaveBeenCalled();
+      expect(repo.saveNote).not.toHaveBeenCalled();
+      expect(repo.deleteNote).not.toHaveBeenCalled();
+      expect(repo.saveOrder).not.toHaveBeenCalled();
+    });
+
+    it("si falla el guardado, lo escrito sigue en memoria y pendiente; el siguiente guardado lo limpia", async () => {
+      const repo = fakeRepository([note("a")]);
+      repo.saveNote.mockRejectedValueOnce(new Error("escritura"));
+      const { result } = await renderNotes(repo);
+      await act(async () => result.current.setActiveNote("a"));
+
+      await act(async () => result.current.updateActiveNote({ title: "Importante" }));
+      await advance(DELAY);
+
+      expect(repo.saveNote).toHaveBeenCalledTimes(1);
+      expect(result.current.activeNoteState?.title).toBe("Importante");
+      expect(result.current.loadingSaveNote).toBe(true);
+      expect(result.current.saveError).toBe("No se pudieron guardar los cambios.");
+
+      await act(async () => result.current.updateActiveNote({ title: "Importante!" }));
+      await advance(DELAY);
+
+      expect(repo.saveNote).toHaveBeenCalledTimes(2);
+      expect(repo.saveNote.mock.calls[1][0].title).toBe("Importante!");
+      expect(result.current.saveError).toBeNull();
+      expect(result.current.loadingSaveNote).toBe(false);
+    });
+
+    it("si falla el guardado al cambiar de nota, los cambios quedan en memoria y se reintentan", async () => {
+      const repo = fakeRepository([note("a"), note("b")]);
+      repo.saveNote.mockRejectedValueOnce(new Error("escritura"));
+      const { result } = await renderNotes(repo);
+      await act(async () => result.current.setActiveNote("a"));
+      await act(async () => result.current.updateActiveNote({ title: "A sin guardar" }));
+
+      await act(async () => result.current.setActiveNote("b"));
+
+      expect(result.current.notes[0].title).toBe("A sin guardar");
+      expect(result.current.loadingSaveNote).toBe(true);
+      expect(result.current.saveError).not.toBeNull();
+
+      // Al volver a abrirla se ven los cambios
+      await act(async () => result.current.setActiveNote("a"));
+      expect(result.current.activeNoteState?.title).toBe("A sin guardar");
+
+      // Un guardado posterior (de cualquier nota) la reintenta
+      await act(async () => result.current.updateActiveNote({ title: "A otra vez" }));
+      await advance(DELAY);
+      await act(async () => result.current.setActiveNote("b"));
+      await act(async () => result.current.updateActiveNote({ title: "B" }));
+      await advance(DELAY);
+
+      const savedA = repo.saveNote.mock.calls.filter(([n]) => n.id === "a");
+      expect(savedA.at(-1)?.[0].title).toBe("A otra vez");
+      expect(result.current.saveError).toBeNull();
+      expect(result.current.loadingSaveNote).toBe(false);
+    });
+
+    it("una nota que no se pudo crear sigue en la lista y el siguiente guardado la inserta", async () => {
+      const repo = fakeRepository([note("a")]);
+      repo.createNote.mockRejectedValueOnce(new Error("escritura"));
+      const { result } = await renderNotes(repo);
+
+      await act(async () => result.current.addNote());
+      const created = result.current.notes[1];
+
+      expect(created.title).toBe("Nueva Nota :)");
+      expect(result.current.saveError).toBe("No se pudieron guardar los cambios.");
+      expect(result.current.loadingSaveNote).toBe(true);
+
+      await act(async () => result.current.saveUpdatesNotesOnDBorLocalStorage());
+
+      expect(repo.saveNote).toHaveBeenCalledWith(
+        expect.objectContaining({ id: created.id }),
+      );
+      expect(result.current.saveError).toBeNull();
+      expect(result.current.loadingSaveNote).toBe(false);
+    });
+
+    it("si falla el borrado, la nota vuelve a su lugar y avisa", async () => {
+      const repo = fakeRepository([note("a"), note("b"), note("c")]);
+      repo.deleteNote.mockRejectedValueOnce(new Error("escritura"));
+      const { result } = await renderNotes(repo);
+
+      await act(async () => result.current.deleteNote("b"));
+
+      expect(result.current.notes.map((n) => n.id)).toEqual(["a", "b", "c"]);
+      expect(result.current.saveError).toBe("No se pudo borrar la nota.");
+    });
+
+    it("una edición durante un guardado en vuelo deja la nota como pendiente", async () => {
+      const repo = fakeRepository([note("a")]);
+      const save = deferred<INotes>();
+      repo.saveNote.mockReturnValueOnce(save.promise);
+      const { result } = await renderNotes(repo);
+      await act(async () => result.current.setActiveNote("a"));
+      await act(async () => result.current.updateActiveNote({ title: "1" }));
+      await advance(DELAY);
+
+      await act(async () => result.current.updateActiveNote({ title: "2" }));
+      await act(async () => save.resolve(repo.saveNote.mock.calls[0][0]));
+
+      expect(result.current.loadingSaveNote).toBe(true);
+      expect(result.current.activeNoteState?.title).toBe("2");
+    });
   });
 });
