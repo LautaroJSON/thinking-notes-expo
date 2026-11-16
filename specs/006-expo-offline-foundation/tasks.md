@@ -113,20 +113,20 @@ desarrollo y Vercel.
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T028 [P] [US5] Traer src/components/utils/dates.test.ts de la app Vite adaptado a Jest
-- [ ] T029 [P] [US5] Traer src/components/utils/noteLaunch.test.ts de la app Vite adaptado a Jest
-- [ ] T030 [P] [US5] Traer src/components/utils/dictation.test.ts de la app Vite adaptado a Jest
-- [ ] T031 [P] [US5] Traer src/components/utils/copyNote.test.ts de la app Vite adaptado a Jest
+- [X] T028 [P] [US5] Traer src/components/utils/dates.test.ts de la app Vite adaptado a Jest
+- [X] T029 [P] [US5] Traer src/components/utils/noteLaunch.test.ts de la app Vite adaptado a Jest
+- [X] T030 [P] [US5] Traer src/components/utils/dictation.test.ts de la app Vite adaptado a Jest
+- [X] T031 [P] [US5] Traer src/components/utils/copyNote.test.ts de la app Vite adaptado a Jest
 
 ### Implementation for User Story 5
 
-- [ ] T032 [P] [US5] Traer src/components/utils/dates.ts de la app Vite tal cual hasta que T028 pase (si `Intl.DateTimeFormat("es")` da otro formato en Hermes, es un tema de la interfaz y se anota; el test corre en Node)
-- [ ] T033 [P] [US5] Crear src/components/utils/noteAnimation.ts solo con `NOTE_ANIMATION_IDS` y `type NoteAnimationId` (sin la carga ni el guardado en `localStorage` de la app Vite)
-- [ ] T034 [US5] Traer src/components/utils/noteLaunch.ts de la app Vite tal cual hasta que T029 pase (depende de T033)
-- [ ] T035 [P] [US5] Traer src/components/utils/dictation.ts de la app Vite tal cual hasta que T030 pase
-- [ ] T036 [P] [US5] Traer src/components/utils/copyNote.ts de la app Vite tal cual hasta que T031 pase
-- [ ] T037 [P] [US5] Generar metro.config.js con `npx expo customize metro.config.js`, agregar `config.resolver.assetExts.push("wasm")` y, en `config.server.enhanceMiddleware`, las cabeceras `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Embedder-Policy: require-corp` (contracts/web-headers.md)
-- [ ] T038 [P] [US5] Crear vercel.json con `buildCommand: "npx expo export -p web"`, `outputDirectory: "dist"`, `framework: null`, `cleanUrls: true`, el rewrite `{ source: "/:path*", destination: "/" }` y `headers: [{ source: "/(.*)", headers: [COOP same-origin, COEP require-corp] }]`
+- [X] T032 [P] [US5] Traer src/components/utils/dates.ts de la app Vite tal cual hasta que T028 pase (si `Intl.DateTimeFormat("es")` da otro formato en Hermes, es un tema de la interfaz y se anota; el test corre en Node)
+- [X] T033 [P] [US5] Crear src/components/utils/noteAnimation.ts solo con `NOTE_ANIMATION_IDS` y `type NoteAnimationId` (sin la carga ni el guardado en `localStorage` de la app Vite)
+- [X] T034 [US5] Traer src/components/utils/noteLaunch.ts de la app Vite tal cual hasta que T029 pase (depende de T033)
+- [X] T035 [P] [US5] Traer src/components/utils/dictation.ts de la app Vite tal cual hasta que T030 pase
+- [X] T036 [P] [US5] Traer src/components/utils/copyNote.ts de la app Vite tal cual hasta que T031 pase
+- [X] T037 [P] [US5] Generar metro.config.js con `npx expo customize metro.config.js`, agregar `config.resolver.assetExts.push("wasm")` y, en `config.server.enhanceMiddleware`, las cabeceras `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Embedder-Policy: require-corp` (contracts/web-headers.md)
+- [X] T038 [P] [US5] Crear vercel.json con `buildCommand: "npx expo export -p web"`, `outputDirectory: "dist"`, `framework: null`, `cleanUrls: true`, el rewrite `{ source: "/:path*", destination: "/" }` y `headers: [{ source: "/(.*)", headers: [COOP same-origin, COEP require-corp] }]`
 - [ ] T039 [US5] Verificar con `npx expo start --web` y `curl -sI http://localhost:8081 | grep -i cross-origin` que se ven las dos cabeceras, y que `npx expo export --platform web` incluye el `.wasm` de expo-sqlite en `dist/`
 
 **Checkpoint**: base completa; los cuatro gates pasan.
